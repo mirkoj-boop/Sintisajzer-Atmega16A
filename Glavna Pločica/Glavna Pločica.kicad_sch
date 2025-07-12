@@ -2923,12 +2923,6 @@
 		(uuid "7ec39db2-208b-4c2b-bfa4-1a2c0f1ebdf3")
 	)
 	(junction
-		(at 104.14 95.25)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "7fbb98b1-b853-4f5e-84ca-51b3fb0fb622")
-	)
-	(junction
 		(at 151.13 31.75)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3152,16 +3146,6 @@
 	)
 	(wire
 		(pts
-			(xy 104.14 95.25) (xy 110.49 95.25)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "8491f8d6-d2bc-4581-9745-e47d6f19c9db")
-	)
-	(wire
-		(pts
 			(xy 140.97 64.77) (xy 140.97 60.96)
 		)
 		(stroke
@@ -3172,16 +3156,6 @@
 	)
 	(wire
 		(pts
-			(xy 104.14 95.25) (xy 104.14 97.79)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "8a3e316e-4ab3-4873-a6a6-ce28b10e1bad")
-	)
-	(wire
-		(pts
 			(xy 156.21 64.77) (xy 140.97 64.77)
 		)
 		(stroke
@@ -3189,16 +3163,6 @@
 			(type default)
 		)
 		(uuid "8c623f61-984d-4122-88a6-ae3f2deedc42")
-	)
-	(wire
-		(pts
-			(xy 104.14 102.87) (xy 104.14 105.41)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9045c4cc-e74b-4dcb-ad68-91a2139b9781")
 	)
 	(wire
 		(pts
@@ -3269,16 +3233,6 @@
 			(type default)
 		)
 		(uuid "9ef1b9c8-032e-4244-bacc-35459c5713cd")
-	)
-	(wire
-		(pts
-			(xy 102.87 95.25) (xy 104.14 95.25)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a31da33a-4efe-464b-a3c3-62efac122bae")
 	)
 	(wire
 		(pts
@@ -3409,6 +3363,16 @@
 			(type default)
 		)
 		(uuid "eda30457-4b04-4954-88f6-3aaba575f61a")
+	)
+	(wire
+		(pts
+			(xy 102.87 95.25) (xy 110.49 95.25)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f5584d48-7a96-4b95-9e8e-9fd24429f9a4")
 	)
 	(wire
 		(pts
@@ -4121,76 +4085,6 @@
 			(project "Glavna Pločica"
 				(path "/2574e60a-000a-4854-9be3-da8ee196ecd1"
 					(reference "#PWR04")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C_Small")
-		(at 104.14 100.33 180)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "06b558dd-5898-4ac2-9c8c-f546d7027db1")
-		(property "Reference" "C6"
-			(at 106.68 99.0535 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Value" "0.05 μF"
-			(at 106.68 101.5935 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 104.14 100.33 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 104.14 100.33 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Unpolarized capacitor, small symbol"
-			(at 104.14 100.33 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "a0ed80ff-3769-4711-80cb-0f80a5cb6351")
-		)
-		(pin "2"
-			(uuid "6439b753-1649-42bb-aa97-4a3810a6ac20")
-		)
-		(instances
-			(project "Glavna Pločica"
-				(path "/2574e60a-000a-4854-9be3-da8ee196ecd1"
-					(reference "C6")
 					(unit 1)
 				)
 			)
@@ -4985,72 +4879,6 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 104.14 113.03 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "5124c908-85b0-4d1f-8300-89bcd01ebd94")
-		(property "Reference" "#PWR09"
-			(at 104.14 119.38 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 104.14 118.11 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 104.14 113.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 104.14 113.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 104.14 113.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "06975596-113c-4da3-9ff3-f76746cd7dd1")
-		)
-		(instances
-			(project "Glavna Pločica"
-				(path "/2574e60a-000a-4854-9be3-da8ee196ecd1"
-					(reference "#PWR09")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
 		(at 116.84 100.33 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -5611,76 +5439,6 @@
 			(project ""
 				(path "/2574e60a-000a-4854-9be3-da8ee196ecd1"
 					(reference "#PWR07")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 104.14 109.22 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "c6428e6f-6741-4efb-8d90-ce5bb3d3f0cb")
-		(property "Reference" "R3"
-			(at 106.68 107.9499 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "R"
-			(at 106.68 110.4899 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 102.362 109.22 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 104.14 109.22 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 104.14 109.22 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "2d8357ea-3c9a-4ab4-856e-23c3ff88323e")
-		)
-		(pin "2"
-			(uuid "51792b03-9324-4528-853d-e1a190d7414b")
-		)
-		(instances
-			(project ""
-				(path "/2574e60a-000a-4854-9be3-da8ee196ecd1"
-					(reference "R3")
 					(unit 1)
 				)
 			)

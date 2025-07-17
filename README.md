@@ -1,11 +1,11 @@
-# 🎛️ MainBoard
+# 🎛️ Razvoj jednostavnog digitalno upravljanog sintisajzera temeljenog na mikroupravljaču ATmega328P
 
-**MainBoard** is a custom-designed PCB that integrates:
-- a **microcontroller** for digital control,
-- a **DAC (Digital-to-Analog Converter)** for precise audio signal generation, and
-- an **LM386 preamplifier** for driving small speakers or line-level outputs.
+**** jednostavni PCB dizajn:
+- **ATMEGA328P-PU** kao digitalni Osclirtor,
+- **DAC (Digital-to-Analog Converter) MCP4725** za digitalno analognu pretvorbu i 12-bitno uzorkovanje
+- an **LM386 preamplifier** pretpojačalo za 8Ω zvučnik.
 
-It’s designed as a compact platform for audio signal generation and amplification projects — ideal for synth enthusiasts, hobbyists, and embedded developers.
+Dizajnirano jednostavno pojačalo za sintisajzer
 
 ---
 

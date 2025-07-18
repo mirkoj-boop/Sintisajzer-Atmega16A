@@ -7,73 +7,17 @@
 
 Dizajnirano jednostavno pojačalo za sintisajzer
 
----
-
-## 🖼️ Photos
-
-### 📷 Assembled Board
-![MainBoard Photo](images/20250710_150732.jpg)
-
-### 🔷 Block Diagram
-![Block Diagram](images/block-diagram.png)
-
-*(Upload your block diagram image to `images/block-diagram.png` to display here.)*
-
----
-
-## 🚀 Features
-
-- Microcontroller unit (MCU)  
-- Digital-to-Analog Converter (DAC)  
-- LM386-based audio preamplifier  
-- Compact form factor  
-- Ready for DIY audio experiments
-
----
-
-## 🛠️ Getting Started
-
-### 🔧 Assembly
-Solder all components according to the schematic and BOM (Bill of Materials).
-
-### 🔌 Powering
-Power the board with **5V DC** (or as per your design specs).
-
-### 🎵 Audio Output
-Connect the output to a small speaker (8Ω recommended) or an audio line-in.
-
----
-
-## 📂 Repository Contents
-
-| File/Folder  | Description                      |
-|--------------|---------------------------------|
-| `schematics/`| Board schematics and KiCad files|
-| `pcb/`       | PCB layout files                |
-| `firmware/`  | Example MCU firmware (if any)   |
-| `images/`    | Pictures and diagrams           |
-| `README.md`  | This file                      |
-
----
-
-## 🤝 Contributing
-
-Contributions and improvements are welcome! Feel free to fork the repo and open a pull request.
-
----
-
-## 📜 License
-
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🔗 Links
-
-- LM386 datasheet: [Texas Instruments](https://www.ti.com/lit/ds/symlink/lm386.pdf)  
-- DAC datasheet: *(add link here)*  
-- Microcontroller datasheet: *(add link here)*
-
----
-
-🎶 *Happy building and enjoy the sound!*
+1. Inicijaliziraj I2C komunikaciju
+2. Inicijaliziraj tri MCP23008 čipa (postavi sve pinove kao ulaze)
+3. Beskonačno ponavljaj:
+   a. Pročitaj stanje tipki s prva tri MCP23008 čipa (8 tipki po čipu, ukupno 24)
+   b. Inverzija očitanja (jer su tipke aktivne na LOW)
+   c. Provjeri pritisnute tipke u sljedećem redoslijedu:
+      - Za prvi čip (tipke 0-7):
+        Ako je neka tipka pritisnuta, pošalji vrijednost note (notes[0-7]) na DAC i prekini
+      - Ako nema pritisnutih tipki na prvom čipu, provjeri drugi čip (tipke 8-15):
+        Ako je neka tipka pritisnuta26, pošalji vrijednost note (notes[8-15]) na DAC i prekini
+      - Ako nema pritisnutih tipki na drugom čipu, provjeri treći čip (tipke 16-23):
+        Ako je neka tipka pritisnuta, pošalji vrijednost note (notes[16-23]) na DAC i prekini
+      - Ako nijedna tipka nije pritisnuta, postavi DAC na 0 (tišina)
+   d. Pričekaj 10 ms prije sljedećeg očitavanja

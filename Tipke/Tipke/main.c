@@ -1,129 +1,137 @@
+#define F_CPU 16000000UL
+
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 
-// MCP23008 registri
-#define MCP_IODIR  0x00
-#define MCP_GPIO   0x09
+#define MCP4725_ADDR 0x61
+#define MCP23008_BASE_ADDR 0x21
 
-// I2C adrese ure?aja
-#define MCP1_ADDR  0x21
-#define MCP2_ADDR  0x22
-#define MCP3_ADDR  0x23
-#define DAC_ADDR   0x60
+#include "i2c.h"
 
-// Tablica DAC vrijednosti za 24 note (C3–B4)
+volatile uint16_t current_frequency = 0;
+
+// Lookup table: frekvencije za 24 tipke (C4 ? B5)
 const uint16_t notes[24] = {
-	406,  431,  457,  483,  512,  542,  574,  608,  644,  683,  723,  766,
-	812,  862,  914,  969, 1027, 1088, 1153, 1221, 1293, 1369, 1449, 1533
+	262, 277, 294, 311, 330, 349, 370, 392,   // C4 - G4
+	415, 440, 466, 494, 523, 554, 587, 622,   // G#4 - D#5
+	659, 698, 740, 784, 831, 880, 932, 988    // E5 - B5
 };
-// Ove vrijednosti odgovaraju 12-bit DAC-u s Vref=3.3V i 1V/oct skali
-// C3 ? 130.8Hz do B4 ? 493.9Hz
 
-// ====== I2C ======
-void TWI_init(void) {
-	TWSR = 0x00;            // prescaler 1
-	TWBR = 72;              // SCL ~100kHz @16MHz
-	TWCR = (1<<TWEN);
+// Funkcija za slanje DAC vrijednosti (0-4095)
+void dac_output(uint16_t value) {
+	i2c_start();
+	i2c_write((MCP4725_ADDR << 1) | 0);
+	i2c_write(0x40); // Fast mode
+	i2c_write(value >> 4);
+	i2c_write((value & 0x0F) << 4);
+	i2c_stop();
 }
 
-void TWI_start(void) {
-	TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN);
-	while (!(TWCR & (1<<TWINT)));
+// Timer1 ISR: toggla square wave na DAC
+ISR(TIMER1_COMPA_vect) {
+	static uint8_t state = 0;
+	if (state) {
+		dac_output(4095);
+		} else {
+		dac_output(0);
+	}
+	state = !state;
 }
 
-void TWI_stop(void) {
-	TWCR = (1<<TWINT)|(1<<TWEN)|(1<<TWSTO);
+// Postavi Timer1 za zadanu frekvenciju
+void set_frequency(uint16_t freq) {
+	if (freq == 0) {
+		TCCR1B = 0; // zaustavi timer
+		dac_output(0);
+		return;
+	}
+
+	uint32_t ocr = (F_CPU / (2UL * freq)) - 1;
+	cli();
+	OCR1A = (uint16_t)ocr;
+	TCNT1 = 0;
+	TCCR1B = (1 << WGM12) | (1 << CS10); // CTC, no prescaler
+	sei();
 }
 
-void TWI_write(uint8_t data) {
-	TWDR = data;
-	TWCR = (1<<TWINT)|(1<<TWEN);
-	while (!(TWCR & (1<<TWINT)));
+// Inicijaliziraj MCP23008 na zadanoj adresi
+void mcp23008_init(uint8_t addr) {
+	i2c_start();
+	i2c_write((addr << 1) | 0);
+	i2c_write(0x00); // IODIR
+	i2c_write(0xFF); // svi ulazi
+	i2c_stop();
+
+	i2c_start();
+	i2c_write((addr << 1) | 0);
+	i2c_write(0x06); // GPPU
+	i2c_write(0xFF); // pull-up enable
+	i2c_stop();
 }
 
-uint8_t TWI_read_nack(void) {
-	TWCR = (1<<TWINT)|(1<<TWEN);
-	while (!(TWCR & (1<<TWINT)));
-	return TWDR;
+// ?itaj GPIO s MCP23008
+uint8_t mcp23008_read(uint8_t addr) {
+	uint8_t data;
+
+	i2c_start();
+	i2c_write((addr << 1) | 0);
+	i2c_write(0x09); // GPIO
+	i2c_start();
+	i2c_write((addr << 1) | 1);
+	data = i2c_read_nack();
+	i2c_stop();
+
+	return data;
 }
 
-// ====== MCP23008 ======
-void MCP23008_init(uint8_t addr) {
-	TWI_start();
-	TWI_write((addr<<1) | 0);
-	TWI_write(MCP_IODIR);
-	TWI_write(0xFF);    // svi pinovi kao ulazi
-	TWI_stop();
-}
-
-uint8_t MCP23008_read(uint8_t addr) {
-	uint8_t val;
-	TWI_start();
-	TWI_write((addr<<1) | 0);
-	TWI_write(MCP_GPIO);
-	TWI_start();
-	TWI_write((addr<<1) | 1);
-	val = TWI_read_nack();
-	TWI_stop();
-	return val;
-}
-
-// ====== MCP4725 DAC ======
-void MCP4725_write(uint16_t value) {
-	TWI_start();
-	TWI_write((DAC_ADDR<<1) | 0);
-	TWI_write(0x40);                // write DAC register
-	TWI_write(value >> 4);          // MSB
-	TWI_write((value & 0x0F)<<4);  // LSB
-	TWI_stop();
-}
-
-// ====== MAIN ======
 int main(void) {
-	TWI_init();
-	MCP23008_init(MCP1_ADDR);
-	MCP23008_init(MCP2_ADDR);
-	MCP23008_init(MCP3_ADDR);
+	i2c_init();
+
+	// Init MCP23008 ekspandere
+	for (uint8_t i = 0; i < 3; i++) {
+		mcp23008_init(MCP23008_BASE_ADDR + i);
+	}
+
+	// Init Timer1
+	TCCR1A = 0;
+	TCCR1B = 0;
+	TIMSK1 = (1 << OCIE1A);
+
+	sei();
+
+	uint8_t last_state[3] = {0xFF, 0xFF, 0xFF}; // za debouncing
+	uint8_t stable_state[3] = {0xFF, 0xFF, 0xFF};
 
 	while (1) {
-		uint8_t keys[3];
-		keys[0] = ~MCP23008_read(MCP1_ADDR);  // invert (aktivno LOW)
-		keys[1] = ~MCP23008_read(MCP2_ADDR);
-		keys[2] = ~MCP23008_read(MCP3_ADDR);
+		for (uint8_t exp = 0; exp < 3; exp++) {
+			uint8_t state = mcp23008_read(MCP23008_BASE_ADDR + exp);
 
-		uint8_t found = 0;
-
-		for (uint8_t i = 0; i < 8; i++) {
-			if (keys[0] & (1<<i)) {
-				MCP4725_write(notes[i]);
-				found = 1;
-				break;
+			// Debounce
+			if (state != last_state[exp]) {
+				_delay_ms(5); // debounce delay
+				state = mcp23008_read(MCP23008_BASE_ADDR + exp);
+				last_state[exp] = state;
 			}
-		}
-		if (!found) {
-			for (uint8_t i = 0; i < 8; i++) {
-				if (keys[1] & (1<<i)) {
-					MCP4725_write(notes[i+8]);
-					found = 1;
-					break;
+
+			if (state != stable_state[exp]) {
+				stable_state[exp] = state;
+
+				// Provjeri tipke
+				for (uint8_t bit = 0; bit < 8; bit++) {
+					if (!(state & (1 << bit))) {
+						// Tipka pritisnuta
+						current_frequency = notes[exp * 8 + bit];
+						set_frequency(current_frequency);
+						goto next_scan;
+					}
 				}
 			}
 		}
-		if (!found) {
-			for (uint8_t i = 0; i < 8; i++) {
-				if (keys[2] & (1<<i)) {
-					MCP4725_write(notes[i+16]);
-					found = 1;
-					break;
-				}
-			}
-		}
+		// Ako nijedna tipka nije pritisnuta
+		set_frequency(0);
 
-		if (!found) {
-			// nijedna tipka pritisnuta
-			MCP4725_write(0);
-		}
-
-		_delay_ms(10);
+		next_scan:
+		;
 	}
 }

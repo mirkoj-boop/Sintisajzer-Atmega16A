@@ -8,10 +8,9 @@
 #define MCP23008_ADDR3 0x46 // 0x23 << 1
 
 // Registri MCP23008
-#define IODIR   0x00 // Smjer pina (0 = izlaz, 1 = ulaz)
-#define GPIO    0x09 // GPIO registar (?itanje/pisanje stanja pinova)
+#define IODIR   0x00 // Pinovi postavljeni kao output
+#define GPIO    0x09 // GPIO registar postavljen za ?itanje/pisanje
 
-// Frekvencije za 24 tipke (C4 do B5, 2 oktave)
 static const int note_freqs[24] = {
 	262, 277, 294, 311, 330, 349, 370, 392, 415, 440, 466, 494, // C4 do B4
 	523, 554, 587, 622, 659, 698, 740, 784, 831, 880, 932, 988  // C5 do B5
@@ -65,7 +64,7 @@ int main(void) {
 			prev_state[chip] = states[chip]; // Spremi trenutno stanje
 		}
 		
-		_delay_ms(10); // Mali delay za smanjenje optere?enja
+		_delay_ms(10); 
 	}
 	
 	return 0;

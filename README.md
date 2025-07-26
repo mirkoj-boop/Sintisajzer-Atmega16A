@@ -1,7 +1,7 @@
-# 🎛️ Razvoj jednostavnog digitalno upravljanog sintisajzera temeljenog na mikroupravljaču ATmega328P
+# 🎛️ Razvoj jednostavnog digitalno upravljanog sintisajzera temeljenog na mikroupravljaču ATmega16A
 
 **** jednostavni PCB dizajn:
-- **ATMEGA328P-PU** kao digitalni Osclirtor,
+- **ATMEGA16-A** kao digitalni Osclirtor,
 - **DAC (Digital-to-Analog Converter) MCP4725** za digitalno analognu pretvorbu i 12-bitno uzorkovanje
 - an **LM386 preamplifier** pretpojačalo za 8Ω zvučnik.
 

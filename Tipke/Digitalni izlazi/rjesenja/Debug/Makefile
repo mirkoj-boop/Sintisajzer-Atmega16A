@@ -34,14 +34,16 @@ LINKER_SCRIPT_DEP:=
 # Every subdirectory with source files must be described here
 SUBDIRS :=  \
 ../AVR\ lib \
-../I2C
+../I2C \
+../USART
 
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
 ../AVR\ lib/AVR_lib.c \
-../main.c \
-../I2C/i2c.c
+../I2C/i2c.c \
+../testUsarta.c \
+../USART/USART.c
 
 
 PREPROCESSING_SRCS += 
@@ -52,23 +54,27 @@ ASM_SRCS +=
 
 OBJS +=  \
 AVR\ lib/AVR_lib.o \
-main.o \
-I2C/i2c.o
+I2C/i2c.o \
+testUsarta.o \
+USART/USART.o
 
 OBJS_AS_ARGS +=  \
 "AVR lib/AVR_lib.o" \
-main.o \
-I2C/i2c.o
+I2C/i2c.o \
+testUsarta.o \
+USART/USART.o
 
 C_DEPS +=  \
 AVR\ lib/AVR_lib.d \
-main.d \
-I2C/i2c.d
+I2C/i2c.d \
+testUsarta.d \
+USART/USART.d
 
 C_DEPS_AS_ARGS +=  \
 "AVR lib/AVR_lib.d" \
-main.d \
-I2C/i2c.d
+I2C/i2c.d \
+testUsarta.d \
+USART/USART.d
 
 OUTPUT_FILE_PATH +=izlaz.elf
 
@@ -91,14 +97,21 @@ AVR\ lib/AVR_lib.o: ../AVR\ lib/AVR_lib.c
 	@echo Finished building: $<
 	
 
-./main.o: .././main.c
+I2C/i2c.o: ../I2C/i2c.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
 	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega16 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\gcc\dev\atmega16" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
-I2C/i2c.o: ../I2C/i2c.c
+./testUsarta.o: .././testUsarta.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega16 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\gcc\dev\atmega16" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+USART/USART.o: ../USART/USART.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
 	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\include"  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g2 -Wall -mmcu=atmega16 -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\gcc\dev\atmega16" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 

@@ -45,15 +45,15 @@
     <BootSegment>2</BootSegment>
     <AsfFrameworkConfig>
       <framework-data>
-  <options />
-  <configurations />
-  <files />
-  <documentation help="" />
-  <offline-documentation help="" />
-  <dependencies>
-    <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.44.1" />
-  </dependencies>
-</framework-data>
+        <options />
+        <configurations />
+        <files />
+        <documentation help="" />
+        <offline-documentation help="" />
+        <dependencies>
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.44.1" />
+        </dependencies>
+      </framework-data>
     </AsfFrameworkConfig>
     <preserveEEPROM>true</preserveEEPROM>
     <ResetRule>0</ResetRule>
@@ -134,19 +134,29 @@
     <Compile Include="AVR lib\AVR_lib.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="main.c">
+    <None Include="main.c">
       <SubType>compile</SubType>
-    </Compile>
+    </None>
     <Compile Include="I2C\i2c.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="I2C\i2c.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="testUsarta.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="USART\USART.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="USART\USART.h">
+      <SubType>compile</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AVR lib" />
     <Folder Include="I2C" />
+    <Folder Include="USART" />
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
 </Project>

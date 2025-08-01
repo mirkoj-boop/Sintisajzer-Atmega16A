@@ -1,12 +1,8 @@
 #ifndef I2C_H
 #define I2C_H
 
-#include <avr/io.h>
 #include <stdint.h>
-
-// Makroi za I2C operacije
-#define I2C_READ    1
-#define I2C_WRITE   0
+#include <util/twi.h>
 
 // Inicijalizacija I2C modula
 void i2c_init(uint32_t scl_freq);
@@ -28,5 +24,8 @@ uint8_t i2c_read_ack(void);
 
 // Čitanje bajta s NACK-om
 uint8_t i2c_read_nack(void);
+
+//int i2c_write(uint8_t *byte_to_be_written);
+//int i2c_read(uint8_t *byte_received);
 
 #endif 

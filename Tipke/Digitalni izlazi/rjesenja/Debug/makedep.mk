@@ -4,9 +4,9 @@
 
 AVR lib\AVR_lib.c
 
-I2C\i2c.c
+main.c
 
-testUsarta.c
+I2C\i2c.c
 
 USART\USART.c
 

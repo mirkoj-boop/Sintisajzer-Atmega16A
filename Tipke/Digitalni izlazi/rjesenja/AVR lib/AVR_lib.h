@@ -7,11 +7,8 @@
 AVR_lib.h
  */ 
 
-
-#define F_CPU 8000000ul // konstanta - frekvencija procesora
 #include <avr/io.h>
 #include "stdbool.h"
-
 
 //manipulacija s ulazima i izlazima
 

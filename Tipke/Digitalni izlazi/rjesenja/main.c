@@ -18,17 +18,24 @@ static const int note_freqs[24] = {
 
 // Inicijalizacija MCP23008
 void mcp23008_init(uint8_t addr) {
-	i2c_start(addr | I2C_WRITE);
+	if (i2c_start(addr | TW_WRITE) != 0)
+	{
+		usart_write_string("Alo maci ne radi\n\r");
+		return;
+	}
 	i2c_write(IODIR); // Postavi registar IODIR
+	usart_write_string("2.\r\n");
 	i2c_write(0xFF);  // Svi pinovi su ulazi
+	usart_write_string("3.\r\n");
 	i2c_stop();
+	usart_write_string("4.\r\n");
 }
 
 // ?itanje stanja tipki s MCP23008
 uint8_t mcp23008_read(uint8_t addr) {
-	i2c_start(addr | I2C_WRITE);
+	i2c_start(addr | TW_WRITE);
 	i2c_write(GPIO); // Postavi GPIO registar
-	i2c_rep_start(addr | I2C_READ);
+	i2c_rep_start(addr | TW_READ);
 	uint8_t data = i2c_read_nack();
 	i2c_stop();
 	return data;
@@ -36,16 +43,23 @@ uint8_t mcp23008_read(uint8_t addr) {
 
 int main(void) {
 	// Inicijalizacija
+	BUZZ(0.2, 440);
 	usart_init(9600); // Initialize USART at 9600 baud rate for Realterm
+	usart_write_string("USART initialized.\r\n");
+	
 	i2c_init(100000); // I2C na 100 kHz
+	usart_write_string("I2C initialized.\r\n");
+	
 	mcp23008_init(MCP23008_ADDR1);
+	usart_write_string("MCP 1 initialized.\r\n");
 	mcp23008_init(MCP23008_ADDR2);
+	usart_write_string("MCP 2 initialized.\r\n");
 	mcp23008_init(MCP23008_ADDR3);
+	usart_write_string("MCP 3 initialized.\r\n");
 	
 	// Polje za pra?enje stanja tipki
 	uint8_t prev_state[3] = {0xFF, 0xFF, 0xFF}; // Pretpostavljamo pull-up (1 = tipka nije pritisnuta)
 	
-	// Send initial message to Realterm
 	usart_write_string("System initialized. Monitoring MCP23008 states...\r\n");
 	
 	while (1) {

@@ -1,9 +1,10 @@
 #include "i2c.h"
+
 #include <avr/io.h>
-#include <util/delay.h>
+#include <util/twi.h>
 
 // Inicijalizacija I2C modula
-void i2c_init(uint32_t scl_freq) {
+void i2c_init(const uint32_t scl_freq) {
     // Postavi prescaler na 1
     TWSR = 0x00;
     
@@ -15,21 +16,21 @@ void i2c_init(uint32_t scl_freq) {
 }
 
 // Slanje START uvjeta
-uint8_t i2c_start(uint8_t address) {
+uint8_t i2c_start(const uint8_t address) {
     TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN);
     while (!(TWCR & (1 << TWINT)));
-    if ((TWSR & 0xF8) != 0x08) return 1; // Greška
+    if ((TWSR & TW_STATUS_MASK) != TW_START) return 1; // Greška
     
     TWDR = address;
     TWCR = (1 << TWINT) | (1 << TWEN);
     while (!(TWCR & (1 << TWINT)));
-    if ((TWSR & 0xF8) != ((address & 0x01) ? 0x40 : 0x18)) return 1; // Greška
+    if ((TWSR & TW_STATUS_MASK) != ((address & TW_READ) ? TW_MR_SLA_ACK : TW_MT_SLA_ACK)) return 1; // Greška
     
     return 0; // Uspjeh
 }
 
 // Slanje REPEATED START uvjeta
-uint8_t i2c_rep_start(uint8_t address) {
+uint8_t i2c_rep_start(const uint8_t address) {
     return i2c_start(address);
 }
 
@@ -40,11 +41,10 @@ void i2c_stop(void) {
 }
 
 // Slanje bajta
-uint8_t i2c_write(uint8_t data) {
+uint8_t i2c_write(const uint8_t data) {
     TWDR = data;
     TWCR = (1 << TWINT) | (1 << TWEN);
-    while (!(TWCR & (1 << TWINT)));
-    if ((TWSR & 0xF8) != 0x28) return 1; // Greška
+    if ((TWSR & TW_STATUS_MASK) != TW_MT_DATA_ACK) return 1; // Greška
     
     return 0; // Uspjeh
 }

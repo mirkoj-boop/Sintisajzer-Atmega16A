@@ -1,64 +1,84 @@
 #include "i2c.h"
-
 #include <avr/io.h>
 #include <util/twi.h>
 
 // Inicijalizacija I2C modula
 void i2c_init(const uint32_t scl_freq) {
-    // Postavi prescaler na 1
-    TWSR = 0x00;
-    
-    // Izračunaj TWBR: F_SCL = F_CPU / (16 + 2 * TWBR * Prescaler)
-    TWBR = ((F_CPU / scl_freq) - 16) / 2;
-    
-    // Omogući TWI modul
-    TWCR = (1 << TWEN);
+	// Postavi prescaler na 1
+	TWSR = 0x00;
+	
+	// Izračunaj TWBR: F_SCL = F_CPU / (16 + 2 * TWBR * Prescaler)
+	TWBR = ((F_CPU / scl_freq) - 16) / 2;
+	
+	// Omogući TWI modul
+	TWCR = (1 << TWEN);
 }
 
 // Slanje START uvjeta
 uint8_t i2c_start(const uint8_t address) {
-    TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN);
-    while (!(TWCR & (1 << TWINT)));
-    if ((TWSR & TW_STATUS_MASK) != TW_START) return 1; // Greška
-    
-    TWDR = address;
-    TWCR = (1 << TWINT) | (1 << TWEN);
-    while (!(TWCR & (1 << TWINT)));
-    if ((TWSR & TW_STATUS_MASK) != ((address & TW_READ) ? TW_MR_SLA_ACK : TW_MT_SLA_ACK)) return 1; // Greška
-    
-    return 0; // Uspjeh
+	// Slanje START uvjeta
+	TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN);
+	while (!(TWCR & (1 << TWINT)));
+	if ((TWSR & TW_STATUS_MASK) != TW_START) return 1; // Greška
+	
+	// Slanje adrese
+	TWDR = address;
+	TWCR = (1 << TWINT) | (1 << TWEN);
+	while (!(TWCR & (1 << TWINT)));
+	
+	// Provjera ACK-a ovisno o tome je li čitanje ili pisanje
+	uint8_t expected_status = (address & 0x01) ? TW_MR_SLA_ACK : TW_MT_SLA_ACK;
+	if ((TWSR & TW_STATUS_MASK) != expected_status) return 1; // Greška
+	
+	return 0; // Uspjeh
 }
 
 // Slanje REPEATED START uvjeta
 uint8_t i2c_rep_start(const uint8_t address) {
-    return i2c_start(address);
+	// Slanje REPEATED START uvjeta
+	TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN);
+	while (!(TWCR & (1 << TWINT)));
+	if ((TWSR & TW_STATUS_MASK) != TW_REP_START) return 1; // Greška - različit status za REP_START
+	
+	// Slanje adrese
+	TWDR = address;
+	TWCR = (1 << TWINT) | (1 << TWEN);
+	while (!(TWCR & (1 << TWINT)));
+	
+	// Provjera ACK-a ovisno o tome je li čitanje ili pisanje
+	uint8_t expected_status = (address & 0x01) ? TW_MR_SLA_ACK : TW_MT_SLA_ACK;
+	if ((TWSR & TW_STATUS_MASK) != expected_status) return 1; // Greška
+	
+	return 0; // Uspjeh
 }
 
 // Slanje STOP uvjeta
 void i2c_stop(void) {
-    TWCR = (1 << TWINT) | (1 << TWSTO) | (1 << TWEN);
-    while (TWCR & (1 << TWSTO));
+	TWCR = (1 << TWINT) | (1 << TWSTO) | (1 << TWEN);
+	while (TWCR & (1 << TWSTO));
 }
 
 // Slanje bajta
 uint8_t i2c_write(const uint8_t data) {
-    TWDR = data;
-    TWCR = (1 << TWINT) | (1 << TWEN);
-    if ((TWSR & TW_STATUS_MASK) != TW_MT_DATA_ACK) return 1; // Greška
-    
-    return 0; // Uspjeh
+	TWDR = data;
+	TWCR = (1 << TWINT) | (1 << TWEN);
+	while (!(TWCR & (1 << TWINT))); // NEDOSTAJALO - čekanje da se završi transmisija
+	
+	if ((TWSR & TW_STATUS_MASK) != TW_MT_DATA_ACK) return 1; // Greška
+	
+	return 0; // Uspjeh
 }
 
 // Čitanje bajta s ACK-om
 uint8_t i2c_read_ack(void) {
-    TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
-    while (!(TWCR & (1 << TWINT)));
-    return TWDR;
+	TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWEA);
+	while (!(TWCR & (1 << TWINT)));
+	return TWDR;
 }
 
 // Čitanje bajta s NACK-om
 uint8_t i2c_read_nack(void) {
-    TWCR = (1 << TWINT) | (1 << TWEN);
-    while (!(TWCR & (1 << TWINT)));
-    return TWDR;
+	TWCR = (1 << TWINT) | (1 << TWEN);
+	while (!(TWCR & (1 << TWINT)));
+	return TWDR;
 }

@@ -2,17 +2,16 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include "I2C/i2c.h"
-#include "USART/USART.h"
+#include "LCD/lcd.h"
 
-// ISPRAVKA 1: Koristite 7-bit adrese, ne 8-bit
-// Vaš scanner je pokazao 0x21, 0x22, 0x23
-#define MCP23008_ADDR1 0x21  // Bilo: 0x42
-#define MCP23008_ADDR2 0x22  // Bilo: 0x44
-#define MCP23008_ADDR3 0x23  // Bilo: 0x48
+// 7-bit adrese MCP23008 ?ipova
+#define MCP23008_ADDR1 0x21
+#define MCP23008_ADDR2 0x22
+#define MCP23008_ADDR3 0x23
 
 // Registri MCP23008
 #define IODIR   0x00
-#define GPPU    0x06  // DODANO: Pull-up registar
+#define GPPU    0x06  // Pull-up registar
 #define GPIO    0x09
 
 static const int note_freqs[24] = {
@@ -20,90 +19,137 @@ static const int note_freqs[24] = {
 	523, 554, 587, 622, 659, 698, 740, 784, 831, 880, 932, 988  // C5 do B5
 };
 
-// ISPRAVKA 2: Dodaj << 1 shift u funkciji, ne u #define
+// Globalne varijable za toggle funkcionalnost
+uint8_t display_mode = 0;  // 0 = PWM, 1 = sawtooth
+uint8_t pb0_prev_state = 1;  // Prethodno stanje PB0 (pull-up = 1)
+
 void mcp23008_init(uint8_t addr) {
-	uint8_t write_addr = addr << 1;  // DODANO: Shift ovdje
+	uint8_t write_addr = addr << 1;  // Shift za I2C write adresu
 	
-	if (i2c_start(write_addr) != 0) {  // ISPRAVKA: Uklonjen |TW_WRITE
-		usart_write_string("Alo maci ne radi\r\n");
-		return;
+	// Postavi IODIR registar - svi pinovi kao input
+	if (i2c_start(write_addr) != 0) {
+		return;  // Greška u komunikaciji
 	}
 	i2c_write(IODIR);
-	usart_write_string("2.\r\n");
-	i2c_write(0xFF);
-	usart_write_string("3.\r\n");
+	i2c_write(0xFF);  // Svi pinovi kao input
 	i2c_stop();
 	
-	// DODANO: Inicijaliziraj pull-up otpornike
+	// Uklju?i pull-up otpornike na svim pinovima
 	if (i2c_start(write_addr) != 0) return;
 	i2c_write(GPPU);
-	i2c_write(0xFF);  // Uklju?i pull-up na svim pinovima
+	i2c_write(0xFF);  // Pull-up na svim pinovima
 	i2c_stop();
-	
-	usart_write_string("4.\r\n");
 }
 
-// ISPRAVKA 3: Dodaj << 1 shift i u read funkciju
 uint8_t mcp23008_read(uint8_t addr) {
-	uint8_t write_addr = addr << 1;      // DODANO
-	uint8_t read_addr = write_addr | 0x01;  // DODANO
+	uint8_t write_addr = addr << 1;
+	uint8_t read_addr = write_addr | 0x01;
 	
-	i2c_start(write_addr);               // ISPRAVKA: Uklonjen |TW_WRITE
+	i2c_start(write_addr);
 	i2c_write(GPIO);
-	i2c_rep_start(read_addr);            // ISPRAVKA: Uklonjen |TW_READ
+	i2c_rep_start(read_addr);
 	uint8_t data = i2c_read_nack();
 	i2c_stop();
 	return data;
 }
 
+void inicijalizacija() {
+	input_port(DDRB, PB0);  // pin PB0 postavljen kao ulaz
+	set_port(PORTB, PB0, 1); // uklju?en pritezni otpornik na PB0
+	
+	lcd_init(); // inicijalizacija lcd displeja
+}
+
+void update_display() {
+	lcd_clrscr();
+	lcd_home();
+	
+	if (display_mode == 0) {
+		lcd_print("PWM");
+		} else {
+		lcd_print("sawtooth");
+	}
+}
+
 int main(void) {
-	// Inicijalizacija
-	BUZZ(0.2, 440);
-	usart_init(9600);
-	usart_write_string("USART initialized.\r\n");
+	inicijalizacija();
+	lcd_clrscr();
+	lcd_home();
 	
-	i2c_init(100000);
-	usart_write_string("I2C initialized.\r\n");
+	lcd_print("Welcome");
+	_delay_ms(1000);  // Duži delay da se vidi welcome poruka
 	
+	// Postavi po?etni display
+	update_display();
+	
+	// Inicijalizacija sistema
+	SAWTOOTH(0.2, 440);  // Kratki beep da signalizira po?etak
+	
+	i2c_init(100000);  // Inicijalizuj I2C na 100kHz
+	
+	// Inicijalizuj sve tri MCP23008 ?ipa
 	mcp23008_init(MCP23008_ADDR1);
-	usart_write_string("MCP 1 initialized.\r\n");
 	mcp23008_init(MCP23008_ADDR2);
-	usart_write_string("MCP 2 initialized.\r\n");
 	mcp23008_init(MCP23008_ADDR3);
-	usart_write_string("MCP 3 initialized.\r\n");
 	
-	uint8_t prev_state[3] = {0xFF, 0xFF, 0xFF};
+	// Kratka pauza nakon inicijalizacije
+	_delay_ms(100);
 	
-	usart_write_string("System initialized. Monitoring MCP23008 states...\r\n");
+	// Tri kratka beep-a da signalizira uspešnu inicijalizaciju
+	SAWTOOTH(0.1, 523);
+	_delay_ms(100);
+	SAWTOOTH(0.1, 659);
+	_delay_ms(100);
+	SAWTOOTH(0.1, 784);
+	
+	uint8_t prev_state[3] = {0xFF, 0xFF, 0xFF};  // Prethodno stanje pinova
 	
 	while (1) {
+		// ?itaj trenutno stanje PB0
+		uint8_t pb0_current_state = get_pin(PINB, PB0);
+		
+		// Detektuj pritisak PB0 (prelazak sa 1 na 0)
+		if (pb0_current_state == 0 && pb0_prev_state == 1) {
+			// Toggle display mode
+			display_mode = !display_mode;
+			update_display();
+			
+			// Kratki beep za potvrdu
+			BUZZ(0.1, 880);
+			
+			// Debounce delay
+			_delay_ms(200);
+		}
+		
+		// Ažuriraj prethodno stanje PB0
+		pb0_prev_state = pb0_current_state;
+		
+		// ?itaj trenutno stanje sva tri ?ipa
 		uint8_t states[3] = {
 			mcp23008_read(MCP23008_ADDR1),
 			mcp23008_read(MCP23008_ADDR2),
 			mcp23008_read(MCP23008_ADDR3)
 		};
 		
-		// Debug ispis - zadržano kao u originalu
-		usart_write("MCP1: 0x%02X, MCP2: 0x%02X, MCP3: 0x%02X\r\n",
-		states[0], states[1], states[2]);
-		
+		// Provjeri svaki ?ip i pin za promjene
 		for (uint8_t chip = 0; chip < 3; chip++) {
 			for (uint8_t pin = 0; pin < 8; pin++) {
+				// Detektuj pritisak tipke (prelazak sa 1 na 0 zbog pull-up)
 				if (!(states[chip] & (1 << pin)) && (prev_state[chip] & (1 << pin))) {
 					uint8_t note_index = chip * 8 + pin;
 					
-					// ISPRAVKA 4: Provjeri da note_index nije izvan granica
+					// Provjeri da note_index nije izvan granica niza
 					if (note_index < 24) {
-						usart_write("Key pressed: Chip %d, Pin %d, Note %d Hz\r\n",
-						chip + 1, pin, note_freqs[note_index]);
+						// Sviraj odgovaraju?u notu
 						BUZZ(0.2, note_freqs[note_index]);
 					}
 				}
 			}
+			// Ažuriraj prethodno stanje
 			prev_state[chip] = states[chip];
 		}
 		
-		_delay_ms(100);  // ISPRAVKA 5: Bilo *delay*ms
+		_delay_ms(50);  // Kratka pauza izme?u ?itanja
 	}
 	
 	return 0;

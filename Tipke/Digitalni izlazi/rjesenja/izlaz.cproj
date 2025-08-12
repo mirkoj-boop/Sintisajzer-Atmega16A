@@ -139,6 +139,12 @@
     <Compile Include="AVR lib\AVR_lib.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="LCD\lcd.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="LCD\lcd.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
@@ -161,6 +167,7 @@
   <ItemGroup>
     <Folder Include="AVR lib" />
     <Folder Include="I2C" />
+    <Folder Include="LCD" />
     <Folder Include="USART" />
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />

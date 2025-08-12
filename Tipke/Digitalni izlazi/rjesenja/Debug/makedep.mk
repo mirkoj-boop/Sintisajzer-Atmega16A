@@ -4,6 +4,8 @@
 
 AVR lib\AVR_lib.c
 
+LCD\lcd.c
+
 main.c
 
 I2C\i2c.c

@@ -1,9 +1,8 @@
-# 🎛️ Razvoj jednostavnog digitalno upravljanog sintisajzera temeljenog na mikroupravljaču ATmega16A
+# 🎹 Razvoj jednostavnog digitalno upravljanog sintisajzera temeljenog na mikroupravljaču ATmega16A
 
 **** jednostavni PCB dizajn:
-- **ATMEGA16-A** kao digitalni Osclirtor,
-- **DAC (Digital-to-Analog Converter) MCP4725** za digitalno analognu pretvorbu i 12-bitno uzorkovanje
-- an **LM386 preamplifier** pretpojačalo za 8Ω zvučnik.
+- **ATMEGA16-A** kao digitalni Oscilator
+- an **LM386 preamplifier** pretpojačalo za 8 Ω zvučnik.
 
 Dizajnirano jednostavno pojačalo za sintisajzer
 
